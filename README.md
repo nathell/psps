@@ -8,14 +8,17 @@ word list.  Please note that the input file is not bundled with this
 program, you must possess a legal copy of OSPS to be able to use it.
 
 Quick HOWTO:
-0. extract the tarball, cd to the psps directory
+
+0. extract the tarball, cd to the `psps/src/c` directory
 1. run `make`
-2. run `./psps /path/to/osps/l.lxa` (or copy `l.lxa`
-   to current directory and run `psps`)
+2. run `./psps INPUT_FILE` (if no input file is provided, psps
+   will by default look for `l.lxa` in the current directory)
 3. you should now have a file named `words.txt`
 
-Windows users: Copy `psps.exe` and `l.lxa` from OSPS to one directory,
-then run `psps.exe`.  This should create a file named `words.txt`.
+The input file can be either `l.lxa` from the OSPS distribution, or
+`updateXX.upd` as downloaded from [the PFS site][1]. Note that in
+the latter case you technically don’t have to have OSPS installed,
+but it’s still a legal obligation.
 
 ## Polish
 
@@ -24,17 +27,23 @@ umożliwia wydobycie listy słów z pliku w binarnym formacie OSPS.
 Uwaga: dane wejściowe nie są dostarczone z tym programem; aby zrobić z
 niego użytek, musisz być właścicielem legalnej kopii OSPS.
 
+Ta wersja działa też z plikami update, do ściągnięcia ze [strony PFS][1].
+
 Szybkie HOWTO:
-0. rozpakuj archiwum, zmieñ katalog na psps
+
+0. rozpakuj archiwum, zmień katalog na `psps/src/c`
 1. uruchom `make`
-2. uruchom `./psps /ścieżka/do/osps/l.lxa`
-   (albo skopiuj `l.lxa` do bieżącego katalogu i uruchom psps)
+2. uruchom `./psps PLIK_WEJŚCIOWY` (jeśli nie podano pliku wejściowego,
+   psps domyślnie poszuka `l.lxa` w bieżącym katalogu)
 3. powinien się utworzyć plik `words.txt`
 
-Pod Windows: Skopiuj pliki `psps.exe` i `l.lxa` z OSPS do jednego
-katalogu, a potem uruchom `psps.exe`. Powinien utworzyć się plik
-`words.txt`.
+Plikiem wejściowym może być `l.lxa` z dystrybucji OSPS albo `updateXX.upd`
+pobrany ze [strony PFS][1]. W tym drugim przypadku technicznie nie ma potrzeby,
+żeby OSPS był zainstalowany, ale nadal należy posiadać nań licencję – jest to
+wymóg prawny.
 
 ## Licencja / License
 
 GPLv3 (see `COPYING`).
+
+ [1]: http://www.pfs.org.pl/osps_aktualizacje.php
