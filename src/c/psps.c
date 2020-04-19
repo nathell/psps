@@ -1,5 +1,5 @@
 /*
- * PSPS 0.1 -- Przeno¶ny S³ownik Polskiego Scrabblisty
+ * PSPS 0.1 -- PrzenoÅ›ny SÅ‚ownik Polskiego Scrabblisty
  * Copyright (C) 2007, Daniel Janus <nathell@korpus.pl>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -42,65 +42,86 @@ void read_lxa(FILE *f, uint32_t *lxa, size_t size)
       size -= numread;
    } while (numread != 0);
    if (size > 0) {
-      printf("%d\n", size);
+      printf("%d\n", (int)size);
       err("l.lxa not wholly read");
    }
 }
 
-char tr(uint8_t ch)
+const char *tr(uint8_t ch)
 {
+   static char fallback[2] = {0};
    const char *src = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_";
-   const char *dst = "a±bcædeêfghijkl³mnñoóprs¶tuwyz¼¿";
+   const char * const dst[] = {"a", "Ä…", "b", "c", "Ä‡", "d", "e", "Ä™", "f", "g", "h", "i", "j", "k", "l", "Å‚",
+                               "m", "n", "Å„", "o", "Ã³", "p", "r", "s", "Å›", "t", "u", "w", "y", "z", "Åº", "Å¼"};
    const int x = strlen(src);
    int i;
    for (i = 0; i < x; i++)
       if ((uint8_t)src[i] == ch)
          return dst[i];
-   return (char)ch;
+   *fallback = (char)ch;
+   return fallback;
 }
 
 void dump(uint32_t *lxa, uint32_t node, char *word, int pos, FILE *out)
 {
    uint32_t dest = (lxa[node] >> 10) & 0x3FFFFF;
-   char ch = tr((lxa[node] >> 2) & 0xFF);
+   const char *ch = tr((lxa[node] >> 2) & 0xFF);
    uint32_t flag1 = (lxa[node] >> 1) & 1;
    uint32_t flag2 = lxa[node] & 1;
-   word[pos] = ch;
+   strncpy(word + pos, ch, 5);
    if (flag2) {
-      word[pos + 1] = 0;
+      word[pos + strlen(ch)] = 0;
       fprintf(out, "%s\n", word);
    }
    if (dest != 0)
-      dump(lxa, dest, word, pos + 1, out);
+      dump(lxa, dest, word, pos + strlen(ch), out);
    if (flag1 == 0)
       dump(lxa, node + 1, word, pos, out);
 }
 
-int main(int argc, char *argv[]) 
-{
-   char *fname = "l.lxa";
-   FILE *f, *out;
-   uint32_t *lxa;
+uint32_t *open_lxa(const char *fname) {
+   FILE *f;
    struct stat statbuf;
-   char word[256];
-   
-   if (argc > 1)
-      fname = argv[1];
+   off_t size;
+   uint32_t *lxa;
+
+   int update = 0;
+   if (strstr(fname, ".upd"))
+      update = 1;
    f = fopen(fname, "rb");
    if (f == NULL)
-      err("Could not open l.lxa.\n");
+      err("Could not open input file.");
+   if (stat(fname, &statbuf) == -1)
+      err("Error in stat().");
+   size = statbuf.st_size;
+   if (update) {
+      uint32_t item;
+      fread(&item, sizeof(item), 1, f);
+      fseek(f, 16L, SEEK_SET);
+      size = 4 * item;
+   }
+   lxa = malloc(size);
+   if (lxa == NULL)
+      err("Out of memory.");
+   read_lxa(f, lxa, size);
+   fclose(f);
+   return lxa;
+}
+
+int main(int argc, char *argv[])
+{
+   char *fname = "l.lxa";
+   FILE *out;
+   uint32_t *lxa;
+   char word[256];
+
+   if (argc > 1)
+      fname = argv[1];
+   lxa = open_lxa(fname);
    out = fopen("words.txt", "w");
    if (out == NULL)
       err("Could not open words.txt for writing.");
-   if (stat(fname, &statbuf) == -1)
-      err("Error in stat().");
-   lxa = malloc(statbuf.st_size);
-   if (lxa == NULL)
-      err("Out of memory.");
-   read_lxa(f, lxa, statbuf.st_size);
    dump(lxa, lxa[0], word, 0, out);
    free(lxa);
-   fclose(f);
    fclose(out);
 }
-
